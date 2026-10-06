@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="LumaFind - discover visual inspiration by searching for images.">
+    <title>LumaFind — Discover Visual Inspiration</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <header class="site-header">
+        <a href="#" class="brand" aria-label="LumaFind home">
+            <span class="brand-mark">L</span>
+            <span>LumaFind</span>
+        </a>
+
+        <span class="header-label">Visual Discovery</span>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <p class="eyebrow">EXPLORE • DISCOVER • INSPIRE</p>
+
+                <h1>Find something<br><span>worth seeing.</span></h1>
+
+                <p class="tagline">
+                    Search the world of images and discover your next source of inspiration.
+                </p>
+
+                <form class="search-form" id="search-form">
+                    <label for="search-input">What do you want to explore?</label>
+
+                    <div class="search-row">
+                        <input
+                            type="search"
+                            id="search-input"
+                            name="search"
+                            placeholder="Try “Japanese architecture”..."
+                            autocomplete="off"
+                        >
+
+                        <button type="submit" id="search-button">
+                            Search
+                            <span aria-hidden="true">→</span>
+                        </button>
+                    </div>
+                </form>
+
+                <div class="quick-picks">
+                    <span class="quick-label">Try exploring</span>
+
+                    <div class="chips" aria-label="Suggested search topics">
+                        <button type="button" class="chip">Nature</button>
+                        <button type="button" class="chip">Architecture</button>
+                        <button type="button" class="chip">Anime</button>
+                        <button type="button" class="chip">Space</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="results-section" aria-label="Image search results">
+            <div class="results-heading">
+                <div>
+                    <p class="section-label">DISCOVERY</p>
+                    <h2>Your results</h2>
+                </div>
+
+                <span class="result-count" id="result-count">Results will appear here</span>
+            </div>
+
+            <div id="results" class="results-grid"></div>
+
+            <div class="empty-state" id="empty-state">
+                <div class="empty-icon" aria-hidden="true">✦</div>
+                <h3>Search to see results</h3>
+                <p>Your visual discoveries will appear here.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>LumaFind · A visual discovery experience</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
