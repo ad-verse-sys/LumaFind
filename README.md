@@ -35,5 +35,5 @@ A dark navy, teal and amber palette gives the app its own identity, and the quic
 
 ## Live demo
 
-- Repo: <your repo URL>
-- Live site: <your live URL>
+- Repo URL: https://github.com/ad-verse-sys/LumaFind
+- Live URL: https://ad-verse-sys.github.io/LumaFind/
