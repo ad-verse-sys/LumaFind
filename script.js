@@ -6,6 +6,8 @@ const resultsContainer = document.getElementById("results");
 const resultCount = document.getElementById("result-count");
 const emptyState = document.getElementById("empty-state");
 const chips = document.querySelectorAll(".chip");
+const searchButton = document.getElementById("search-button");
+const statusBox = document.getElementById("status");
 
 const API_URL = "https://commons.wikimedia.org/w/api.php";
 const RESULT_LIMIT = 24;
@@ -115,24 +117,64 @@ function createCard(item) {
     return card;
 }
 
-/* Show results (or a "nothing found" message) in the grid. */
-function renderResults(items, query) {
-    resultsContainer.innerHTML = ""; // clear old results first
+/* ---------- Status area: loading / empty / error / blocked ---------- */
 
-    if (items.length === 0) {
-        resultCount.textContent = "No results";
-        emptyState.querySelector("h3").textContent = "No results for “" + query + "”";
-        emptyState.querySelector("p").textContent = "Try a different or broader search term.";
-        emptyState.hidden = false;
-        return;
+function hideStatus() {
+    statusBox.hidden = true;
+    statusBox.innerHTML = "";
+}
+
+function showStatus(type, title, message, withRetry) {
+    emptyState.hidden = true;
+    statusBox.className = "status status-" + type;
+    statusBox.innerHTML = "";
+
+    if (type === "loading") {
+        const spinner = document.createElement("div");
+        spinner.className = "spinner";
+        spinner.setAttribute("aria-hidden", "true");
+        statusBox.appendChild(spinner);
     }
 
-    emptyState.hidden = true;
-    items.forEach((item) => resultsContainer.appendChild(createCard(item)));
+    const heading = document.createElement("h3");
+    heading.textContent = title;
+    statusBox.appendChild(heading);
+
+    if (message) {
+        const text = document.createElement("p");
+        text.textContent = message;
+        statusBox.appendChild(text);
+    }
+
+    if (withRetry) {
+        const retry = document.createElement("button");
+        retry.type = "button";
+        retry.className = "retry-button";
+        retry.textContent = "Try again";
+        retry.addEventListener("click", () => form.requestSubmit());
+        statusBox.appendChild(retry);
+    }
+
+    statusBox.hidden = false;
+}
+
+/* Show the cards and the result count. */
+function renderResults(items, query) {
+    resultsContainer.innerHTML = ""; // clear old results first
+    hideStatus();
+
+    items.forEach((item, index) => {
+        const card = createCard(item);
+        card.style.animationDelay = Math.min(index * 40, 600) + "ms"; // staggered fade-in
+        resultsContainer.appendChild(card);
+    });
 
     const word = items.length === 1 ? "result" : "results";
     resultCount.textContent = "Showing " + items.length + " " + word + " for “" + query + "”";
 }
+
+/* Only the most recent search is allowed to update the page. */
+let latestSearch = 0;
 
 /* 1. Catch the search. */
 form.addEventListener("submit", async (event) => {
@@ -145,23 +187,53 @@ form.addEventListener("submit", async (event) => {
     if (isUnsafe(query)) {
         resultsContainer.innerHTML = "";
         resultCount.textContent = "Search blocked";
-        emptyState.querySelector("h3").textContent = "Let’s keep it family-friendly";
-        emptyState.querySelector("p").textContent = "Try a different search term.";
-        emptyState.hidden = false;
+        showStatus("empty", "Let’s keep it family-friendly", "Try a different search term.");
         return;
     }
 
-    // 2. Fetch the data.
-    const response = await fetch(buildUrl(query));
-    if (!response.ok) return; // Part 3 will add proper error messages
+    const searchId = ++latestSearch;
 
-    const data = await response.json();
+    // LOADING: show the indicator before fetch starts.
+    resultsContainer.innerHTML = "";
+    resultCount.textContent = "Searching…";
+    showStatus("loading", "Searching for “" + query + "”…", "Finding the best images for you.");
+    searchButton.disabled = true;
 
-    // 3. Render the results.
-    renderResults(parseResults(data), query);
+    try {
+        // 2. Fetch the data.
+        const response = await fetch(buildUrl(query));
+        if (!response.ok) {
+            throw new Error("Request failed with status " + response.status);
+        }
+
+        const data = await response.json();
+        if (searchId !== latestSearch) return; // a newer search took over
+
+        const items = parseResults(data);
+
+        // EMPTY: never show a blank grid.
+        if (items.length === 0) {
+            resultCount.textContent = "No results";
+            showStatus("empty", "No results for “" + query + "”", "No results for that word. Try another search.");
+            return;
+        }
+
+        // 3. Render the results.
+        renderResults(items, query);
+    } catch (error) {
+        if (searchId !== latestSearch) return;
+        console.error(error);
+
+        // ERROR: friendly message instead of a blank screen.
+        resultsContainer.innerHTML = "";
+        resultCount.textContent = "Search failed";
+        showStatus("error", "Something went wrong", "Please check your connection and try again.", true);
+    } finally {
+        if (searchId === latestSearch) searchButton.disabled = false;
+    }
 });
 
-/* Enhancement: clicking a quick-pick chip runs a search for it. */
+/* Quick-pick chips run a search when clicked. */
 chips.forEach((chip) => {
     chip.addEventListener("click", () => {
         input.value = chip.textContent;
