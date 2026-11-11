@@ -24,4 +24,16 @@ LumaFind is a visual image-search app designed to help users discover images and
 
 A dark navy, teal and amber palette gives the app its own identity, and the quick-pick row shows users example topics without making the page feel like a traditional search engine.
 
-Coming in Part 3: loading spinners and full error handling.
+## Part 3: finishing touches
+
+- **Loading state:** a spinner and "Searching for …" message appear the moment a search starts, and the Search button is disabled until it finishes.
+- **Empty state:** a search with no matches shows "No results for that word. Try another search." instead of a blank grid.
+- **Error state:** the fetch is wrapped in `try…catch` (with a `response.ok` check). A failure shows "Something went wrong" with a **Try again** button.
+- **Polish:** result count, staggered fade-in on cards, keyboard focus styles, reduced-motion support, and a single-column layout on very small phones.
+- **Safe-search:** blocked words are excluded from the query and filtered out of results.
+- **Race-condition guard:** only the latest search can update the page, so fast typing never shows stale results.
+
+## Live demo
+
+- Repo URL: https://github.com/ad-verse-sys/LumaFind
+- Live URL: https://ad-verse-sys.github.io/LumaFind/
